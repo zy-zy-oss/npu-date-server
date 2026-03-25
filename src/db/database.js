@@ -22,54 +22,14 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
 // 初始化表结构
 const initTables = () => {
   db.serialize(() => {
-    // 用户表
-    db.run(`
-      CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL,
-        name TEXT,
-        school TEXT,
-        gender TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
-    `)
-
-    // 邮箱验证表
-    db.run(`
-      CREATE TABLE IF NOT EXISTS email_verifications (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT NOT NULL,
-        code TEXT NOT NULL UNIQUE,
-        expires_at DATETIME NOT NULL,
-        verified INTEGER DEFAULT 0,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
-    `)
-
-    // 问卷答案表
+    // 问卷答案表（极简版：每个邮箱对应一个问卷）
     db.run(`
       CREATE TABLE IF NOT EXISTS questionnaires (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        type TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
         answers TEXT NOT NULL,
         submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id)
-      )
-    `)
-
-    // 匹配结果表
-    db.run(`
-      CREATE TABLE IF NOT EXISTS matches (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id_1 INTEGER NOT NULL,
-        user_id_2 INTEGER NOT NULL,
-        match_score REAL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id_1) REFERENCES users(id),
-        FOREIGN KEY (user_id_2) REFERENCES users(id)
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `)
 

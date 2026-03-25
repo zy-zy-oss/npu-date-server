@@ -3,7 +3,6 @@ const router = express.Router()
 const db = require('../db/database')
 const bcrypt = require('bcryptjs')
 const crypto = require('crypto')
-const { authMiddleware } = require('../middleware/auth')
 const { baseQuestionnaire, dateQuestionnaire, buddyQuestionnaire, mbtiQuestionnaire } = require('../data/questionnaires')
 const { sendMatchResult } = require('../services/emailService')
 
@@ -22,11 +21,10 @@ router.get('/', (req, res) => {
 
 /**
  * POST /api/questionnaire/submit
- * 提交问卷答案（支持未登录匿名提交，提供邮箱可关联账号）
+ * 提交问卷答案（极简版：每个邮箱对应一个问卷）
  */
-router.post('/submit', async (req, res) => {
-  const { answers, email } = req.body
-  let userId = req.user?.userId
+router.post('/submit', (req, res) => {
+  const { answers, email, type = 'base' } = req.body
 
   if (!answers) {
     return res.status(400).json({
@@ -35,80 +33,54 @@ router.post('/submit', async (req, res) => {
     })
   }
 
-  const ensureUserId = () => {
-    return new Promise((resolve, reject) => {
-      if (userId) {
-        return resolve(userId)
-      }
+  // 验证邮箱格式
+  if (!email || !email.includes('@')) {
+    return res.status(400).json({
+      code: 400,
+      message: '邮箱不能为空且必须包含@符号'
+    })
+  }
 
-      const fallbackEmail = (email || 'anonymous@anonymous.npu-date').trim().toLowerCase()
-      db.get('SELECT id FROM users WHERE email = ?', [fallbackEmail], (err, row) => {
-        if (err) {
-          return reject(err)
-        }
-        if (row) {
-          return resolve(row.id)
-        }
+  const emailNormalized = email.trim().toLowerCase()
 
-        const randomPassword = crypto.randomBytes(8).toString('hex')
-        const hashedPassword = bcrypt.hashSync(randomPassword, 10)
-        db.run(
-          'INSERT INTO users (email, password, name, school) VALUES (?, ?, ?, ?)',
-          [fallbackEmail, hashedPassword, '匿名用户', ''],
-          function(insertErr) {
-            if (insertErr) {
-              return reject(insertErr)
-            }
-            if (this.lastID) {
-              return resolve(this.lastID)
-            }
-            db.get('SELECT id FROM users WHERE email = ?', [fallbackEmail], (err2, row2) => {
-              if (err2 || !row2) {
-                return reject(err2 || new Error('无法获取用户ID'))
-              }
-              resolve(row2.id)
+  // 检查邮箱是否已存在
+  db.get('SELECT id FROM questionnaires WHERE email = ?', [emailNormalized], (err, existingRow) => {
+    if (err) {
+      return res.status(500).json({
+        code: 500,
+        message: '检查问卷记录失败',
+        error: err.message
+      })
+    }
+
+    if (existingRow) {
+      // 更新现有问卷
+      db.run(
+        'UPDATE questionnaires SET answers = ?, updated_at = CURRENT_TIMESTAMP WHERE email = ?',
+        [JSON.stringify(answers), emailNormalized],
+        function(updateErr) {
+          if (updateErr) {
+            return res.status(500).json({
+              code: 500,
+              message: '问卷更新失败',
+              error: updateErr.message
             })
           }
-        )
-      })
-    })
-  }
 
-  try {
-    userId = await ensureUserId()
-  } catch (err) {
-    console.error('获取用户ID失败:', err)
-    return res.status(500).json({
-      code: 500,
-      message: '用户标识失败',
-      error: err.message
-    })
-  }
-
-  // 检查用户是否已提交过问卷
-  db.get(
-    'SELECT id FROM questionnaires WHERE user_id = ? ORDER BY submitted_at DESC LIMIT 1',
-    [userId],
-    (err, existingRow) => {
-      if (err) {
-        return res.status(500).json({
-          code: 500,
-          message: '检查问卷记录失败',
-          error: err.message
-        })
-      }
-
-      if (existingRow) {
-        db.run('DELETE FROM questionnaires WHERE id = ?', [existingRow.id], (delErr) => {
-          if (delErr) {
-            console.error('删除旧问卷失败:', delErr.message)
-          }
-        })
-      }
-
+          res.json({
+            code: 200,
+            message: '问卷已更新',
+            data: {
+              id: existingRow.id
+            }
+          })
+        }
+      )
+    } else {
+      // 插入新问卷
       db.run(
-        'INSERT INTO questionnaires (user_id, type, answers) VALUES (?, ?, ?)',
-        [userId, 'base', JSON.stringify(answers)],
+        'INSERT INTO questionnaires (email, answers) VALUES (?, ?)',
+        [emailNormalized, JSON.stringify(answers)],
         function(insertErr) {
           if (insertErr) {
             return res.status(500).json({
@@ -117,27 +89,6 @@ router.post('/submit', async (req, res) => {
               error: insertErr.message
             })
           }
-
-          const sendEmail = async () => {
-            return new Promise((resolve) => {
-              db.get('SELECT email, name FROM users WHERE id = ?', [userId], async (err2, user) => {
-                if (user && user.email) {
-                  const matchInfo = {
-                    matchName: user.name || '心动的朋友',
-                    matchSchool: '西北工业大学',
-                    matchGender: answers.gender === 'male' ? '男' : '女',
-                    matchScore: 85
-                  }
-                  await sendMatchResult(user.email, matchInfo).catch(err3 => {
-                    console.error('发送问卷完成邮件失败:', err3.message)
-                  })
-                }
-                resolve()
-              })
-            })
-          }
-
-          sendEmail()
 
           res.json({
             code: 200,
@@ -149,46 +100,10 @@ router.post('/submit', async (req, res) => {
         }
       )
     }
-  )
+  })
 })
 
-/**
- * GET /api/questionnaire/my
- * 获取当前用户的问卷记录
- */
-router.get('/my', authMiddleware, (req, res) => {
-  const userId = req.user.userId
 
-  db.get(
-    'SELECT * FROM questionnaires WHERE user_id = ? ORDER BY submitted_at DESC LIMIT 1',
-    [userId],
-    (err, row) => {
-      if (err) {
-        return res.status(500).json({
-          code: 500,
-          message: '查询失败',
-          error: err.message
-        })
-      }
-
-      if (!row) {
-        return res.status(404).json({
-          code: 404,
-          message: '未找到问卷记录'
-        })
-      }
-
-      res.json({
-        code: 200,
-        message: '获取成功',
-        data: {
-          ...row,
-          answers: JSON.parse(row.answers)
-        }
-      })
-    }
-  )
-})
 
 /**
  * GET /api/questionnaire/type/date

@@ -3,7 +3,6 @@ const cors = require('cors')
 require('dotenv').config()
 
 // 导入路由
-const authRoutes = require('./routes/auth')
 const questionnaireRoutes = require('./routes/questionnaire')
 const db = require('./db/database')
 
@@ -39,7 +38,6 @@ app.get('/health', (req, res) => {
 })
 
 // 路由
-app.use('/api/auth', authRoutes)
 app.use('/api/questionnaire', questionnaireRoutes)
 
 // 错误处理
@@ -71,14 +69,8 @@ app.listen(PORT, () => {
   健康检查: http://localhost:${PORT}/health
   
   可用接口:
-  - POST   /api/auth/send-code          (发送验证码)
-  - POST   /api/auth/verify-code        (验证验证码)
-  - POST   /api/auth/register           (注册用户)
-  - POST   /api/auth/login              (用户登录)
-  - GET    /api/auth/profile            (获取用户信息)
   - GET    /api/questionnaire           (获取问卷)
   - POST   /api/questionnaire/submit    (提交问卷)
-  - GET    /api/questionnaire/:userId   (获取用户问卷记录)
   `)
 })
 
