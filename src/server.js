@@ -4,6 +4,7 @@ require('dotenv').config()
 
 // 导入路由
 const questionnaireRoutes = require('./routes/questionnaire')
+const authRoutes = require('./routes/auth')
 const db = require('./db/database')
 
 const app = express()
@@ -38,6 +39,7 @@ app.get('/health', (req, res) => {
 })
 
 // 路由
+app.use('/api/auth', authRoutes)
 app.use('/api/questionnaire', questionnaireRoutes)
 
 // 错误处理
@@ -71,6 +73,8 @@ app.listen(PORT, () => {
   可用接口:
   - GET    /api/questionnaire           (获取问卷)
   - POST   /api/questionnaire/submit    (提交问卷)
+  - POST   /api/auth/send-code          (发送验证码)
+  - POST   /api/auth/verify-code        (验证邮箱验证码)
   `)
 })
 
