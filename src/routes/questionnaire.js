@@ -18,9 +18,10 @@ router.get('/', (req, res) => {
 /**
  * POST /api/questionnaire/submit
  * 提交问卷答案（同一邮箱 + 类型会覆盖旧记录）
+ * 支持合并提交：基础问卷 + 搭子/恋爱问卷
  */
 router.post('/submit', (req, res) => {
-  const { answers, email, type = 'base' } = req.body
+  const { answers, email, type = 'buddy' } = req.body
 
   if (!answers) {
     return res.status(400).json({
@@ -33,6 +34,14 @@ router.post('/submit', (req, res) => {
     return res.status(400).json({
       code: 400,
       message: '邮箱不能为空且必须包含@符号'
+    })
+  }
+
+  // 验证类型只能是 'buddy' 或 'date'
+  if (type !== 'buddy' && type !== 'date') {
+    return res.status(400).json({
+      code: 400,
+      message: '问卷类型只能是 buddy 或 date'
     })
   }
 
