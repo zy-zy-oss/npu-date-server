@@ -200,49 +200,41 @@ const dateQuestionnaire = {
         { label: '成熟稳重', value: '成熟稳重' },
         { label: '文静内敛', value: '文静内敛' },
         { label: '幽默风趣', value: '幽默风趣' },
-        { label: '温柔体贴', value: '温柔体贴' },
-        { label: '独立自强', value: '独立自强' }
+        { label: '温柔细腻', value: '温柔细腻' }
       ]
     },
     {
       id: 8,
-      type: 'checkbox',
-      title: '期望对方兴趣爱好',
-      key: 'preferHobbies',
+      type: 'radio',
+      title: '恋爱经历',
+      key: 'loveHistory',
       required: false,
       options: [
-        { label: '运动', value: '运动' },
-        { label: '阅读', value: '阅读' },
-        { label: '旅游', value: '旅游' },
-        { label: '摄影', value: '摄影' },
-        { label: '绘画', value: '绘画' },
-        { label: '音乐', value: '音乐' },
-        { label: '电影', value: '电影' },
-        { label: '美食', value: '美食' },
-        { label: '游戏', value: '游戏' }
+        { label: '从未恋爱过', value: 'none' },
+        { label: '恋爱过1-2次', value: 'few' },
+        { label: '恋爱过3次以上', value: 'many' }
       ]
     },
     {
       id: 9,
-      type: 'checkbox',
-      title: '期望对方学历背景',
-      key: 'preferEducation',
+      type: 'radio',
+      title: '恋爱观',
+      key: 'loveView',
       required: false,
       options: [
-        { label: '本科', value: 'undergraduate' },
-        { label: '硕士', value: 'master' },
-        { label: '博士', value: 'doctor' },
-        { label: '不限', value: 'any' }
+        { label: '奔着结婚去', value: 'marriage' },
+        { label: '认真谈一场', value: 'serious' },
+        { label: '顺其自然', value: 'natural' }
       ]
     },
     {
       id: 10,
       type: 'textarea',
-      title: '对理想对象的描述',
-      key: 'idealPartnerDescription',
+      title: '理想对象描述',
+      key: 'idealDesc',
       required: false,
-      placeholder: '描述你心目中理想对象的样子...',
-      maxLength: 300
+      placeholder: '描述一下你理想中的TA~',
+      maxLength: 200
     }
   ]
 }
@@ -253,234 +245,214 @@ const buddyQuestionnaire = {
   questions: [
     {
       id: 1,
-      type: 'checkbox',
-      title: '你想找什么类型的搭子',
-      key: 'buddyType',
+      type: 'radio',
+      title: '搭子类型',
+      key: 'buddyCategory',
       required: true,
       options: [
-        { label: '学习搭子', value: 'study' },
-        { label: '健身搭子', value: 'fitness' },
-        { label: '旅游搭子', value: 'travel' },
-        { label: '美食搭子', value: 'food' },
-        { label: '游戏搭子', value: 'game' },
-        { label: '电影搭子', value: 'movie' },
-        { label: '逛街搭子', value: 'shopping' },
-        { label: '其他', value: 'other' }
+        { label: '学习成长类', value: 'study' },
+        { label: '运动健康类', value: 'sports' },
+        { label: '游戏娱乐类', value: 'game' },
+        { label: '生活娱乐类', value: 'life' }
       ]
     },
     {
       id: 2,
-      type: 'checkbox',
-      title: '搭子应具备的特点',
-      key: 'buddyTraits',
-      required: false,
+      type: 'radio',
+      title: '具体学习成长类型',
+      key: 'studyType',
+      required: true,
+      dependencies: {
+        buddyCategory: ['study']
+      },
       options: [
-        { label: '有责任心', value: 'responsible' },
-        { label: '有趣味', value: 'fun' },
-        { label: '可靠', value: 'reliable' },
-        { label: '有共同话题', value: 'common_interest' },
-        { label: '讲诚信', value: 'trustworthy' },
-        { label: '够坦诚', value: 'honest' }
+        { label: '学习', value: 'study_basic' },
+        { label: '考研', value: 'study_kaoyan' },
+        { label: '考公', value: 'study_kaogong' },
+        { label: '阅读', value: 'study_reading' },
+        { label: '竞赛', value: 'study_competition' },
+        { label: '口语', value: 'study_oral' }
       ]
     },
     {
       id: 3,
-      type: 'textarea',
-      title: '介绍一下你自己和你想找的搭子',
-      key: 'buddyDescription',
-      required: false,
-      placeholder: '描述你的性格、兴趣和期望的搭子类型...',
-      maxLength: 300
-    }
-  ]
-}
-
-// MBTI 问卷 - 16 题简化版
-const mbtiQuestionnaire = {
-  type: 'mbti',
-  questions: [
-    {
-      id: 1,
-      key: 'q1',
-      dimension: 'EI',
       type: 'radio',
-      title: '在社交场合，你通常：',
+      title: '具体运动健康类型',
+      key: 'sportsType',
+      required: true,
+      dependencies: {
+        buddyCategory: ['sports']
+      },
       options: [
-        { value: 'E', label: '主动和陌生人聊天，很容易融入' },
-        { value: 'I', label: '更喜欢与熟人交流，陌生环境会感到疲惫' }
-      ]
-    },
-    {
-      id: 2,
-      key: 'q2',
-      dimension: 'EI',
-      type: 'radio',
-      title: '你的日常精力来源是：',
-      options: [
-        { value: 'E', label: '与他人互动、参加活动' },
-        { value: 'I', label: '独处、思考、阅读' }
-      ]
-    },
-    {
-      id: 3,
-      key: 'q3',
-      dimension: 'SN',
-      type: 'radio',
-      title: '在处理问题时，你更重视：',
-      options: [
-        { value: 'S', label: '具体的事实和现实细节' },
-        { value: 'N', label: '模式、联系和未来可能性' }
+        { label: '跑步', value: 'sports_running' },
+        { label: '爬山', value: 'sports_hiking' },
+        { label: '游泳', value: 'sports_swimming' },
+        { label: '羽毛球', value: 'sports_badminton' },
+        { label: '篮球', value: 'sports_basketball' },
+        { label: '乒乓球', value: 'sports_tennis' },
+        { label: '台球', value: 'sports_billiards' },
+        { label: '骑行', value: 'sports_cycling' }
       ]
     },
     {
       id: 4,
-      key: 'q4',
-      dimension: 'SN',
       type: 'radio',
-      title: '你更容易注意到：',
+      title: '具体游戏类型',
+      key: 'gameType',
+      required: true,
+      dependencies: {
+        buddyCategory: ['game']
+      },
       options: [
-        { value: 'S', label: '事物的实际情况和现状' },
-        { value: 'N', label: '事物可能发展的方向和意义' }
+        { label: 'FPS', value: 'game_fps' },
+        { label: 'Moba', value: 'game_moba' },
+        { label: '开放世界/二次元', value: 'game_openworld' },
+        { label: '派对/休闲', value: 'game_party' },
+        { label: '生存沙盒建设', value: 'game_survival' },
+        { label: '杀戮尖塔', value: 'game_slaythespire' }
       ]
     },
     {
       id: 5,
-      key: 'q5',
-      dimension: 'TF',
       type: 'radio',
-      title: '做决定时，你更看重：',
+      title: '具体生活类型',
+      key: 'lifeType',
+      required: true,
+      dependencies: {
+        buddyCategory: ['life']
+      },
       options: [
-        { value: 'T', label: '逻辑分析和客观事实' },
-        { value: 'F', label: '个人价值观和他人感受' }
+        { label: '即时活动搭子（演唱会、音乐节、话剧、漫展、艺术展）', value: 'life_immediate' },
+        { label: '自律', value: 'life_selfdiscipline' },
+        { label: '摄影', value: 'life_photography' },
+        { label: '剧本杀', value: 'life_boardgame' },
+        { label: 'K歌', value: 'life_karaoke' },
+        { label: '饭搭子', value: 'life_food' },
+        { label: 'City Walk搭子', value: 'life_citywalk' },
+        { label: '观影搭子', value: 'life_movie' },
+        { label: '观鸟', value: 'life_birdwatching' },
+        { label: '钓鱼搭子', value: 'life_fishing' }
       ]
     },
     {
       id: 6,
-      key: 'q6',
-      dimension: 'TF',
       type: 'radio',
-      title: '工作中的冲突，你倾向于：',
+      title: '选择活动类型',
+      key: 'activityType',
+      required: true,
+      dependencies: {
+        lifeType: ['life_immediate']
+      },
       options: [
-        { value: 'T', label: '直接指出问题所在，寻求最优解' },
-        { value: 'F', label: '先考虑他人感受，努力维持关系' }
+        { label: '演唱会', value: 'concert' },
+        { label: '音乐节', value: 'music_festival' },
+        { label: '话剧', value: 'drama' },
+        { label: '艺术展', value: 'exhibition' },
+        { label: '漫展', value: 'comic_con' }
       ]
     },
     {
       id: 7,
-      key: 'q7',
-      dimension: 'JP',
-      type: 'radio',
-      title: '你的生活风格更像是：',
-      options: [
-        { value: 'J', label: '有计划、有结构、井井有条' },
-        { value: 'P', label: '灵活、随遇而安、充满变化' }
-      ]
+      type: 'region',
+      title: '选择活动城市',
+      key: 'activityCity',
+      required: true,
+      dependencies: {
+        lifeType: ['life_immediate']
+      },
+      showPreview: true
     },
     {
       id: 8,
-      key: 'q8',
-      dimension: 'JP',
-      type: 'radio',
-      title: '对于截止日期，你通常：',
-      options: [
-        { value: 'J', label: '提前完成，然后继续改进' },
-        { value: 'P', label: '在最后期限前完成就行' }
-      ]
+      type: 'input',
+      title: '填写活动名称',
+      key: 'activityName',
+      required: true,
+      placeholder: '例如：周杰伦 2026 巡回演唱会',
+      dependencies: {
+        lifeType: ['life_immediate']
+      }
     },
     {
       id: 9,
-      key: 'q9',
-      dimension: 'EI',
-      type: 'radio',
-      title: '假期或休闲时间，你更喜欢：',
-      options: [
-        { value: 'E', label: '和朋友一起出去玩、参加活动' },
-        { value: 'I', label: '自己在家休息、做自己喜欢的事' }
-      ]
+      type: 'date',
+      title: '选择活动时间',
+      key: 'activityTime',
+      required: true,
+      dependencies: {
+        lifeType: ['life_immediate']
+      }
     },
     {
       id: 10,
-      key: 'q10',
-      dimension: 'SN',
       type: 'radio',
-      title: '学习新东西时，你更想要：',
+      title: '匹配灵活度',
+      key: 'matchFlexibility',
+      required: true,
+      dependencies: {
+        lifeType: ['life_immediate']
+      },
       options: [
-        { value: 'S', label: '实际可用的技能和具体步骤' },
-        { value: 'N', label: '深层理论和核心概念' }
+        { label: '只接受同一活动', value: 'same_activity' },
+        { label: '接受同城市不同活动', value: 'same_city' }
       ]
     },
     {
       id: 11,
-      key: 'q11',
-      dimension: 'TF',
-      type: 'radio',
-      title: '面对朋友的困难，你会：',
-      options: [
-        { value: 'T', label: '分析问题、给出建议' },
-        { value: 'F', label: '倾听、表达同情和支持' }
-      ]
+      type: 'textarea',
+      title: '备注',
+      key: 'activityRemark',
+      required: false,
+      placeholder: '可备注场次等信息',
+      maxLength: 100,
+      dependencies: {
+        lifeType: ['life_immediate']
+      }
     },
     {
       id: 12,
-      key: 'q12',
-      dimension: 'JP',
-      type: 'radio',
-      title: '对于改变和不确定性，你：',
-      options: [
-        { value: 'J', label: '更希望提前知道，好作出计划' },
-        { value: 'P', label: '相对来说比较能接受和适应' }
-      ]
+      type: 'date',
+      title: '时效（到何时停止匹配）',
+      key: 'timeLimit',
+      required: true,
+      placeholder: '请选择截止时间'
     },
     {
       id: 13,
-      key: 'q13',
-      dimension: 'EI',
       type: 'radio',
-      title: '在团队中，你通常会：',
+      title: '结伴方式',
+      key: 'buddyMode',
+      required: true,
       options: [
-        { value: 'E', label: '主动参与讨论和活动' },
-        { value: 'I', label: '认真倾听，选择性地参与' }
+        { label: '1V1', value: 'one_on_one' },
+        { label: 'NVN', value: 'group' }
       ]
     },
     {
       id: 14,
-      key: 'q14',
-      dimension: 'SN',
-      type: 'radio',
-      title: '你更容易相信：',
+      type: 'select',
+      title: 'NVN人数',
+      key: 'groupSize',
+      required: true,
+      dependencies: {
+        buddyMode: ['group']
+      },
       options: [
-        { value: 'S', label: '眼睛看到的、经历过的' },
-        { value: 'N', label: '直觉和第六感' }
-      ]
-    },
-    {
-      id: 15,
-      key: 'q15',
-      dimension: 'TF',
-      type: 'radio',
-      title: '在竞争中，你会：',
-      options: [
-        { value: 'T', label: '专注于赢，追求最佳成绩' },
-        { value: 'F', label: '更在乎过程和与他人的互动' }
-      ]
-    },
-    {
-      id: 16,
-      key: 'q16',
-      dimension: 'JP',
-      type: 'radio',
-      title: '工作时，你通常是：',
-      options: [
-        { value: 'J', label: '按照计划执行，逐项完成' },
-        { value: 'P', label: '根据情况灵活调整' }
+        { label: '3人', value: '3' },
+        { label: '4人', value: '4' },
+        { label: '5人', value: '5' },
+        { label: '6人', value: '6' },
+        { label: '7人及以上', value: '7+' }
       ]
     }
   ]
 }
+
+
+
 
 module.exports = {
   baseQuestionnaire,
   dateQuestionnaire,
   buddyQuestionnaire,
-  mbtiQuestionnaire
 }

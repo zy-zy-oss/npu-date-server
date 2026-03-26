@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const db = require('../db/database')
-const { baseQuestionnaire, dateQuestionnaire, buddyQuestionnaire, mbtiQuestionnaire } = require('../data/questionnaires')
+const { baseQuestionnaire, dateQuestionnaire, buddyQuestionnaire } = require('../data/questionnaires')
 
 /**
  * GET /api/questionnaire
@@ -92,17 +92,6 @@ router.get('/type/buddy', (req, res) => {
     code: 200,
     message: '获取成功',
     data: buddyQuestionnaire
-  })
-})
-
-/**
- * GET /api/questionnaire/type/mbti
- */
-router.get('/type/mbti', (req, res) => {
-  res.json({
-    code: 200,
-    message: '获取成功',
-    data: mbtiQuestionnaire
   })
 })
 
